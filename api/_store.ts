@@ -1,0 +1,6 @@
+export type Bucket={id:string;name:string;tier:string;algorithm:"token-bucket"|"sliding-window";capacity:number;refillPerSec:number;remainingTokens:number;totalAllowed:number;totalBlocked:number;lastUpdatedAt:number};
+const g=globalThis as typeof globalThis&{__quotaBuckets?:Map<string,Bucket>};
+export const buckets=g.__quotaBuckets??(g.__quotaBuckets=new Map<string,Bucket>());
+const seed:Bucket[]=[{id:"key_live_enterprise_01",name:"Enterprise Production",tier:"ENTERPRISE",algorithm:"token-bucket",capacity:120,refillPerSec:12,remainingTokens:104,totalAllowed:18240,totalBlocked:37,lastUpdatedAt:Date.now()},{id:"key_live_builder_02",name:"Builder API",tier:"BUILDER",algorithm:"token-bucket",capacity:60,refillPerSec:5,remainingTokens:42,totalAllowed:8420,totalBlocked:126,lastUpdatedAt:Date.now()},{id:"key_test_sandbox_03",name:"Sandbox Testing",tier:"SANDBOX",algorithm:"sliding-window",capacity:25,refillPerSec:1,remainingTokens:8,totalAllowed:1240,totalBlocked:89,lastUpdatedAt:Date.now()}];
+if(!buckets.size)seed.forEach(b=>buckets.set(b.id,b));
+export function refill(b:Bucket){const now=Date.now(),elapsed=Math.max(0,(now-b.lastUpdatedAt)/1000);b.remainingTokens=Math.min(b.capacity,b.remainingTokens+elapsed*b.refillPerSec);b.lastUpdatedAt=now;return b;}
